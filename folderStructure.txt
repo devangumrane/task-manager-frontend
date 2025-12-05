@@ -1,0 +1,94 @@
+src/
+ ├─ api/
+ │   ├─ axios.js
+ │   ├─ authApi.js
+ │   ├─ userApi.js
+ │   ├─ workspaceApi.js
+ │   ├─ projectApi.js
+ │   ├─ taskApi.js
+ │   ├─ attachmentApi.js
+ │   ├─ reminderApi.js
+ │   └─ activityApi.js
+ │
+ ├─ lib/
+ │   ├─ socketClient.js
+ │   ├─ queryClient.js
+ │   ├─ rbac.js
+ │   └─ utils.js
+ │
+ ├─ store/
+ │   ├─ authStore.js
+ │   ├─ workspaceStore.js
+ │   ├─ projectStore.js
+ │   └─ uiStore.js
+ │
+ ├─ hooks/
+ │   ├─ useWorkspaces.js
+ │   ├─ useProjects.js
+ │   ├─ useTasks.js
+ │   ├─ useAttachments.js
+ │   ├─ useReminders.js
+ │   ├─ useActivityFeed.js
+ │   └─ useSocketEvents.js
+ │
+ ├─ components/
+ │   ├─ layout/
+ │   │   ├─ Sidebar.jsx
+ │   │   ├─ Navbar.jsx
+ │   │   └─ AppShell.jsx
+ │   │
+ │   ├─ shared/
+ │   │   ├─ ErrorMessage.jsx
+ │   │   ├─ LoadingSpinner.jsx
+ │   │   ├─ EmptyState.jsx
+ │   │   └─ ConfirmDialog.jsx
+ │   │
+ │   ├─ ui/     ← ALL SHADCN COMPONENTS LIVE HERE
+ │   │   ├─ button.jsx
+ │   │   ├─ input.jsx
+ │   │   ├─ label.jsx
+ │   │   ├─ dialog.jsx
+ │   │   ├─ dropdown-menu.jsx/
+ │   │   ├─ card.jsx
+ │   │   ├─ textarea.jsx/
+ │   │   └─ form.jsx/
+ │   │
+ │   ├─ workspaces/
+ │   │   ├─ WorkspaceTable.jsx
+ │   │   └─ CreateWorkspaceDialog.jsx
+ │   │
+ │   ├─ projects/
+ │   │   ├─ ProjectList.jsx
+ │   │   └─ CreateProjectDialog.jsx
+ │   │
+ │   ├─ tasks/
+ │   │   ├─ TaskList.jsx
+ │   │   ├─ TaskItem.jsx
+ │   │   ├─ TaskModal.jsx
+ │   │   └─ TaskForm.jsx
+ │   │
+ │   ├─ attachments/
+ │   │   ├─ AttachmentList.jsx
+ │   │   ├─ AttachmentUploader.jsx
+ │   │   └─ AttachmentItem.jsx
+ │   │
+ │   ├─ reminders/
+ │   │   ├─ ReminderList.jsx
+ │   │   ├─ ReminderItem.jsx
+ │   │   └─ CreateReminderDialog.jsx
+ │   │
+ │   └─ activity/
+ │       ├─ ActivityFeed.jsx
+ │       ├─ ActivityItem.jsx
+ │       └─ ActivityIcon.jsx
+ │
+ ├─ pages/
+ │   ├─ Dashboard.jsx
+ │   ├─ WorkspaceDetails.jsx
+ │   ├─ ProjectDetails.jsx
+ │   ├─ TaskDetails.jsx (optional)
+ │   └─ Auth/
+ │       ├─ Login.jsx
+ │       └─ Register.jsx
+ │
+ └─ App.jsx
