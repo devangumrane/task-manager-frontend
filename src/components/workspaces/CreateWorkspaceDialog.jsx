@@ -1,8 +1,8 @@
 import { useState } from "react";
-import { useCreateWorkspace } from "@/hooks/useWorkspaces";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import { useCreateWorkspace } from "../../hooks/useWorkspaces";
+import { Button } from "../ui/button";
+import { Input } from "../ui/input";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "../ui/dialog";
 
 export default function CreateWorkspaceDialog({ open, onClose }) {
   const [name, setName] = useState("");

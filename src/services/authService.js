@@ -1,13 +1,28 @@
-import api from './api'
+// src/services/authService.js
+import api from "./api";
 
+/**
+ * LOGIN
+ * Backend response shape:
+ * {
+ *   success: true,
+ *   data: { user, accessToken, refreshToken }
+ * }
+ */
+export const login = async (payload) => {
+  return api.post("/auth/login", payload);
+};
 
-export const login = async (credentials) => {
-const res = await api.post('/auth/login', credentials)
-return res.data
-}
+/**
+ * REGISTER
+ */
+export const register = async (payload) => {
+  return api.post("/auth/register", payload);
+};
 
-
+/**
+ * LOGOUT
+ */
 export const logout = async () => {
-const res = await api.post('/auth/logout')
-return res.data
-}
+  return api.post("/auth/logout");
+};

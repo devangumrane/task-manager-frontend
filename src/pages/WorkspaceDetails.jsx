@@ -1,8 +1,8 @@
 import { useParams } from "react-router-dom";
 import { useState } from "react";
-import { useProjects } from "@/hooks/useProjects";
-import { Button } from "@/components/ui/button";
-import CreateProjectDialog from "@/components/projects/CreateProjectDialog";
+import { useProjects } from "../hooks/useProjects";
+import { Button } from "../components/ui/button";
+import CreateProjectDialog from "../components/projects/CreateProjectDialog";
 
 export default function WorkspaceDetails() {
   const { workspaceId } = useParams();

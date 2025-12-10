@@ -1,27 +1,73 @@
-import { useMutation } from "@tanstack/react-query";
-import api from "@/api/axios";
-import { useAuthStore } from "@/store/authStore";
-import { toast } from "react-hot-toast";
+// src/hooks/useAuth.js
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import {
+  login as loginApi,
+  register as registerApi,
+  logout as logoutApi,
+} from "../services/authService";
+import { useAuthStore } from "../store/authStore";
+import toast from "react-hot-toast";
 
-export function useAuth() {
-  const setUser = useAuthStore((s) => s.setUser);
+export const useAuth = () => {
+  const qc = useQueryClient();
+  const { setAuth, clearAuth } = useAuthStore();
 
+  // ---------------------------------------------------
+  // LOGIN
+  // ---------------------------------------------------
   const login = useMutation({
-    mutationFn: (data) => api.post("/auth/login", data),
+    mutationFn: loginApi,
     onSuccess: (res) => {
-      const { accessToken, user } = res.data.data;
-      localStorage.setItem("token", accessToken);
-      setUser(user);
-      toast.success("Logged in successfully!");
+      const { user, accessToken } = res.data.data;
+
+      setAuth(accessToken, user);
+
+      qc.invalidateQueries(["workspaces"]);
+      toast.success("Logged in");
     },
-    onError: () => toast.error("Invalid credentials"),
+    onError: (err) => {
+      toast.error(err?.response?.data?.error?.message || "Login failed");
+    },
   });
 
+  // ---------------------------------------------------
+  // REGISTER
+  // ---------------------------------------------------
   const register = useMutation({
-    mutationFn: (data) => api.post("/auth/register", data),
-    onSuccess: () => toast.success("Account created! Please log in."),
-    onError: () => toast.error("Registration failed"),
+    mutationFn: registerApi,
+
+    onSuccess: () => {
+      toast.success("Account created — please login");
+    },
+
+    onError: (err) => {
+      console.error("REGISTER ERROR >>>", err);
+      toast.error(err?.response?.data?.error?.message || "Registration failed");
+    },
   });
 
-  return { login, register };
-}
+  // ---------------------------------------------------
+  // LOGOUT
+  // ---------------------------------------------------
+  const logout = useMutation({
+    mutationFn: logoutApi,
+
+    onSuccess: () => {
+      clearAuth();
+      qc.clear();
+      toast.success("Logged out");
+    },
+
+    // Even if server logout fails → still clear local state
+    onError: () => {
+      clearAuth();
+      qc.clear();
+    },
+  });
+
+  return {
+    login,
+    register,
+    logout,
+  };
+};

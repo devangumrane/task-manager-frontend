@@ -1,4 +1,4 @@
-import { Routes, Route } from "react-router-dom";
+import { Routes, Route, Navigate } from "react-router-dom";
 import { useAuthStore } from "./store/authStore";
 
 import DashboardLayout from "./components/layout/DashboardLayout";
@@ -11,65 +11,74 @@ import WorkspaceDetails from "./pages/WorkspaceDetails";
 import ProjectDetails from "./pages/ProjectDetails";
 import TaskDetails from "./pages/TaskDetails";
 
-function ProtectedRoute({ children }) {
-  const token = useAuthStore((state) => state.accessToken);
-  return token ? children : <Login />;
+export function ProtectedRoute({ children }) {
+  const token = useAuthStore((s) => s.accessToken);
+
+  if (!token) {
+    return <Navigate to="/login" replace />;
+  }
+
+  return children;
 }
 
 export default function App() {
   return (
-    <Routes>
-      {/* Public */}
-      <Route path="/login" element={<Login />} />
-      <Route path="/register" element={<Register />} />
+    <>
+      {/* <div className="bg-blue-500 text-white p-4">Tailwind Test</div> */}
 
-      {/* Dashboard */}
-      <Route
-        path="/"
-        element={
-          <ProtectedRoute>
-            <DashboardLayout>
-              <Dashboard />
-            </DashboardLayout>
-          </ProtectedRoute>
-        }
-      />
+      <Routes>
+        {/* Public */}
+        <Route path="/login" element={<Login />} />
+        <Route path="/register" element={<Register />} />
 
-      {/* Workspace */}
-      <Route
-        path="/workspaces/:workspaceId"
-        element={
-          <ProtectedRoute>
-            <DashboardLayout>
-              <WorkspaceDetails />
-            </DashboardLayout>
-          </ProtectedRoute>
-        }
-      />
+        {/* Dashboard */}
+        <Route
+          path="/"
+          element={
+            <ProtectedRoute>
+              <DashboardLayout>
+                <Dashboard />
+              </DashboardLayout>
+            </ProtectedRoute>
+          }
+        />
 
-      {/* Project */}
-      <Route
-        path="/workspaces/:workspaceId/projects/:projectId"
-        element={
-          <ProtectedRoute>
-            <DashboardLayout>
-              <ProjectDetails />
-            </DashboardLayout>
-          </ProtectedRoute>
-        }
-      />
+        {/* Workspace */}
+        <Route
+          path="/workspaces/:workspaceId"
+          element={
+            <ProtectedRoute>
+              <DashboardLayout>
+                <WorkspaceDetails />
+              </DashboardLayout>
+            </ProtectedRoute>
+          }
+        />
 
-      {/* Task */}
-      <Route
-        path="/workspaces/:workspaceId/projects/:projectId/tasks/:taskId"
-        element={
-          <ProtectedRoute>
-            <DashboardLayout>
-              <TaskDetails />
-            </DashboardLayout>
-          </ProtectedRoute>
-        }
-      />
-    </Routes>
+        {/* Project */}
+        <Route
+          path="/workspaces/:workspaceId/projects/:projectId"
+          element={
+            <ProtectedRoute>
+              <DashboardLayout>
+                <ProjectDetails />
+              </DashboardLayout>
+            </ProtectedRoute>
+          }
+        />
+
+        {/* Task */}
+        <Route
+          path="/workspaces/:workspaceId/projects/:projectId/tasks/:taskId"
+          element={
+            <ProtectedRoute>
+              <DashboardLayout>
+                <TaskDetails />
+              </DashboardLayout>
+            </ProtectedRoute>
+          }
+        />
+      </Routes>
+    </>
   );
 }

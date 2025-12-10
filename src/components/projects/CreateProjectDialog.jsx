@@ -1,8 +1,8 @@
 import { useState } from "react";
-import { useCreateProject } from "@/hooks/useProjects";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { useCreateProject } from "../../hooks/useProjects";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "../ui/dialog";
+import { Button } from "../ui/button";
+import { Input } from "../ui/input";
 
 export default function CreateProjectDialog({ open, onClose, workspaceId }) {
   const [name, setName] = useState("");

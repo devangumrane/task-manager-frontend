@@ -1,28 +1,43 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import api from "@/api/axios";
-import { toast } from "react-hot-toast";
+import {
+  getProjectById,
+  getTasksByProject,
+  createProject,
+  listProjects,
+} from "../services/projectService";
 
 export const useProjects = (workspaceId) => {
   return useQuery({
-    queryKey: ["projects", workspaceId],
+    queryKey: ["workspaceProjects", workspaceId],
+    queryFn: () => listProjects(workspaceId),
     enabled: !!workspaceId,
-    queryFn: async () => {
-      const res = await api.get(`/workspaces/${workspaceId}/projects`);
-      return res.data.data;
-    },
+  });
+};
+
+export const useProject = (workspaceId, projectId) => {
+  return useQuery({
+    queryKey: ["project", workspaceId, projectId],
+    queryFn: () => getProjectById(workspaceId, projectId),
+    enabled: !!workspaceId && !!projectId,
+  });
+};
+
+export const useProjectTasks = (workspaceId, projectId) => {
+  return useQuery({
+    queryKey: ["projectTasks", workspaceId, projectId],
+    queryFn: () => getTasksByProject(workspaceId, projectId),
+    enabled: !!workspaceId && !!projectId,
   });
 };
 
 export const useCreateProject = (workspaceId) => {
-  const queryClient = useQueryClient();
+  const qc = useQueryClient();
 
   return useMutation({
-    mutationFn: async (data) =>
-      api.post(`/workspaces/${workspaceId}/projects`, data),
+    mutationFn: (payload) => createProject(workspaceId, payload),
     onSuccess: () => {
-      toast.success("Project created!");
-      queryClient.invalidateQueries(["projects", workspaceId]);
+      qc.invalidateQueries(["workspaceProjects", workspaceId]);
+      qc.invalidateQueries(["workspaces"]);
     },
-    onError: () => toast.error("Failed to create project"),
   });
 };

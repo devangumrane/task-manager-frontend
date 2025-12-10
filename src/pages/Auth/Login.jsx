@@ -1,7 +1,7 @@
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useAuth } from "@/hooks/useAuth";
+import { useAuth } from "../../hooks/useAuth";
 import { useNavigate, Link } from "react-router-dom";
 import {
   Card,
@@ -9,10 +9,10 @@ import {
   CardTitle,
   CardContent,
   CardFooter,
-} from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import { Label } from "@/components/ui/label";
+} from "../../components/ui/card";
+import { Input } from "../../components/ui/input";
+import { Button } from "../../components/ui/button";
+import { Label } from "../../components/ui/label";
 
 const schema = z.object({
   email: z.string().email(),
@@ -30,7 +30,9 @@ export default function Login() {
 
   const onSubmit = (values) => {
     login.mutate(values, {
-      onSuccess: () => navigate("/"),
+      onSuccess: () => {
+        navigate("/", { replace: true });
+      },
     });
   };
 
@@ -58,7 +60,11 @@ export default function Login() {
 
             <div className="space-y-2">
               <Label htmlFor="password">Password</Label>
-              <Input id="password" type="password" {...form.register("password")} />
+              <Input
+                id="password"
+                type="password"
+                {...form.register("password")}
+              />
               {form.formState.errors.password && (
                 <p className="text-sm text-red-500">
                   {form.formState.errors.password.message}

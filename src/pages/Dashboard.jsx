@@ -1,11 +1,11 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { useWorkspaces } from "@/hooks/useWorkspaces";
-import WorkspaceTable from "@/components/workspaces/WorkspaceTable";
-import CreateWorkspaceDialog from "@/components/workspaces/CreateWorkspaceDialog";
-import ThemeToggle from "@/components/ThemeToggle";
-import { Button } from "@/components/ui/button";
-import { useAuthStore } from "@/store/authStore";
+import { useWorkspaces } from "../hooks/useWorkspaces";
+import WorkspaceTable from "../components/workspaces/WorkspaceTable";
+import CreateWorkspaceDialog from "../components/workspaces/CreateWorkspaceDialog";
+import ThemeToggle from "../components/ThemeToggle";
+import { Button } from "../components/ui/button";
+import { useAuthStore } from "../store/authStore";
 
 export default function Dashboard() {
   const navigate = useNavigate();
