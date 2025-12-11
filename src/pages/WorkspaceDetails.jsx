@@ -1,4 +1,4 @@
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import { useState } from "react";
 import { useProjects } from "../hooks/useProjects";
 import { Button } from "../components/ui/button";
@@ -6,6 +6,8 @@ import CreateProjectDialog from "../components/projects/CreateProjectDialog";
 
 export default function WorkspaceDetails() {
   const { workspaceId } = useParams();
+  const navigate = useNavigate();
+
   const { data: projects = [], isLoading } = useProjects(workspaceId);
   const [openDialog, setOpenDialog] = useState(false);
 
@@ -27,7 +29,7 @@ export default function WorkspaceDetails() {
               key={project.id}
               className="cursor-pointer p-3 bg-card rounded-lg border hover:bg-secondary"
               onClick={() =>
-                window.location.assign(`/workspace/${workspaceId}/project/${project.id}`)
+                navigate(`/workspaces/${workspaceId}/projects/${project.id}`)
               }
             >
               {project.name}

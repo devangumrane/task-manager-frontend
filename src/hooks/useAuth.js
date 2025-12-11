@@ -1,4 +1,3 @@
-// src/hooks/useAuth.js
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import {
   login as loginApi,
@@ -12,62 +11,40 @@ export const useAuth = () => {
   const qc = useQueryClient();
   const { setAuth, clearAuth } = useAuthStore();
 
-  // ---------------------------------------------------
-  // LOGIN
-  // ---------------------------------------------------
+  // ---------------- LOGIN -------------------
   const login = useMutation({
     mutationFn: loginApi,
     onSuccess: (res) => {
       const { user, accessToken } = res.data.data;
+      useAuthStore.getState().setAuth(accessToken, user);
 
-      setAuth(accessToken, user);
-
-      qc.invalidateQueries(["workspaces"]);
-      toast.success("Logged in");
+      toast.success("Logged in successfully");
     },
     onError: (err) => {
       toast.error(err?.response?.data?.error?.message || "Login failed");
     },
   });
 
-  // ---------------------------------------------------
-  // REGISTER
-  // ---------------------------------------------------
+  // ---------------- REGISTER -------------------
   const register = useMutation({
     mutationFn: registerApi,
-
-    onSuccess: () => {
-      toast.success("Account created — please login");
-    },
-
-    onError: (err) => {
-      console.error("REGISTER ERROR >>>", err);
-      toast.error(err?.response?.data?.error?.message || "Registration failed");
-    },
+    onSuccess: () => toast.success("Account created! Please login."),
+    onError: (err) =>
+      toast.error(err?.response?.data?.error?.message || "Registration failed"),
   });
 
-  // ---------------------------------------------------
-  // LOGOUT
-  // ---------------------------------------------------
+  // ---------------- LOGOUT -------------------
   const logout = useMutation({
     mutationFn: logoutApi,
-
     onSuccess: () => {
       clearAuth();
       qc.clear();
-      toast.success("Logged out");
     },
-
-    // Even if server logout fails → still clear local state
     onError: () => {
       clearAuth();
       qc.clear();
     },
   });
 
-  return {
-    login,
-    register,
-    logout,
-  };
+  return { login, register, logout };
 };

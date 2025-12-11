@@ -3,6 +3,7 @@ import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useAuth } from "../../hooks/useAuth";
 import { useNavigate, Link } from "react-router-dom";
+
 import {
   Card,
   CardHeader,
@@ -31,6 +32,7 @@ export default function Login() {
   const onSubmit = (values) => {
     login.mutate(values, {
       onSuccess: () => {
+        // Redirect AFTER Zustand token update
         navigate("/", { replace: true });
       },
     });
@@ -42,12 +44,14 @@ export default function Login() {
         <CardHeader>
           <CardTitle className="text-2xl text-center">Login</CardTitle>
         </CardHeader>
+
         <CardContent>
           <form
             className="space-y-4"
             onSubmit={form.handleSubmit(onSubmit)}
             noValidate
           >
+            {/* EMAIL */}
             <div className="space-y-2">
               <Label htmlFor="email">Email</Label>
               <Input id="email" type="email" {...form.register("email")} />
@@ -58,13 +62,10 @@ export default function Login() {
               )}
             </div>
 
+            {/* PASSWORD */}
             <div className="space-y-2">
               <Label htmlFor="password">Password</Label>
-              <Input
-                id="password"
-                type="password"
-                {...form.register("password")}
-              />
+              <Input id="password" type="password" {...form.register("password")} />
               {form.formState.errors.password && (
                 <p className="text-sm text-red-500">
                   {form.formState.errors.password.message}
@@ -72,11 +73,13 @@ export default function Login() {
               )}
             </div>
 
+            {/* SUBMIT */}
             <Button type="submit" className="w-full" disabled={login.isPending}>
               {login.isPending ? "Logging in..." : "Login"}
             </Button>
           </form>
         </CardContent>
+
         <CardFooter className="justify-center text-sm">
           <span className="text-muted-foreground">
             Don&apos;t have an account?{" "}

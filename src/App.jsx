@@ -1,5 +1,6 @@
-import { Routes, Route, Navigate } from "react-router-dom";
+import { Routes, Route, Navigate, Outlet } from "react-router-dom";
 import { useAuthStore } from "./store/authStore";
+import { ROUTES } from "./router/paths";
 
 import DashboardLayout from "./components/layout/DashboardLayout";
 
@@ -7,78 +8,50 @@ import Login from "./pages/Auth/Login";
 import Register from "./pages/Auth/Register";
 
 import Dashboard from "./pages/Dashboard";
+import WorkspacesIndex from "./pages/WorkspacesIndex";
 import WorkspaceDetails from "./pages/WorkspaceDetails";
+
+import ProjectsIndex from "./pages/ProjectsIndex";
 import ProjectDetails from "./pages/ProjectDetails";
+
 import TaskDetails from "./pages/TaskDetails";
+import ActivityPage from "./pages/ActivityPage";
 
-export function ProtectedRoute({ children }) {
+function ProtectedLayout() {
   const token = useAuthStore((s) => s.accessToken);
-
-  if (!token) {
-    return <Navigate to="/login" replace />;
-  }
-
-  return children;
+  return token ? <DashboardLayout /> : <Navigate to={ROUTES.LOGIN} replace />;
 }
 
 export default function App() {
   return (
-    <>
-      {/* <div className="bg-blue-500 text-white p-4">Tailwind Test</div> */}
+    <Routes>
+      {/* Public */}
+      <Route path={ROUTES.LOGIN} element={<Login />} />
+      <Route path={ROUTES.REGISTER} element={<Register />} />
 
-      <Routes>
-        {/* Public */}
-        <Route path="/login" element={<Login />} />
-        <Route path="/register" element={<Register />} />
+      {/* Protected */}
+      <Route element={<ProtectedLayout />}>
+        <Route index element={<Dashboard />} />
 
-        {/* Dashboard */}
+        <Route path={ROUTES.WORKSPACES} element={<WorkspacesIndex />} />
         <Route
-          path="/"
-          element={
-            <ProtectedRoute>
-              <DashboardLayout>
-                <Dashboard />
-              </DashboardLayout>
-            </ProtectedRoute>
-          }
+          path={`${ROUTES.WORKSPACES}/:workspaceId`}
+          element={<WorkspaceDetails />}
         />
 
-        {/* Workspace */}
+        <Route path={ROUTES.PROJECTS} element={<ProjectsIndex />} />
         <Route
-          path="/workspaces/:workspaceId"
-          element={
-            <ProtectedRoute>
-              <DashboardLayout>
-                <WorkspaceDetails />
-              </DashboardLayout>
-            </ProtectedRoute>
-          }
+          path={`${ROUTES.WORKSPACES}/:workspaceId/projects/:projectId`}
+          element={<ProjectDetails />}
         />
 
-        {/* Project */}
         <Route
-          path="/workspaces/:workspaceId/projects/:projectId"
-          element={
-            <ProtectedRoute>
-              <DashboardLayout>
-                <ProjectDetails />
-              </DashboardLayout>
-            </ProtectedRoute>
-          }
+          path={`${ROUTES.WORKSPACES}/:workspaceId/projects/:projectId/tasks/:taskId`}
+          element={<TaskDetails />}
         />
 
-        {/* Task */}
-        <Route
-          path="/workspaces/:workspaceId/projects/:projectId/tasks/:taskId"
-          element={
-            <ProtectedRoute>
-              <DashboardLayout>
-                <TaskDetails />
-              </DashboardLayout>
-            </ProtectedRoute>
-          }
-        />
-      </Routes>
-    </>
+        <Route path={ROUTES.ACTIVITY} element={<ActivityPage />} />
+      </Route>
+    </Routes>
   );
 }

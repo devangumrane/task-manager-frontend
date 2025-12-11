@@ -1,6 +1,6 @@
+// src/components/layout/Topbar.jsx
 import { useRef, useState, useEffect } from "react";
-import { Sun, Moon } from "lucide-react";
-import { motion } from "framer-motion";
+import { Search, Bell, Sun, Moon } from "lucide-react";
 import { useTheme } from "../ThemeProvider";
 
 import SearchInput from "../topbar/SearchInput";
@@ -17,11 +17,8 @@ export default function Topbar() {
 
   const searchRef = useRef(null);
 
-  // ------------------------------------------------------
-  // KEYBOARD SHORTCUTS
   // "/" → focus search
-  // "Ctrl+K" or "Cmd+K" → open command palette
-  // ------------------------------------------------------
+  // Ctrl/Cmd + K → open command palette
   useEffect(() => {
     const handler = (e) => {
       if (e.key === "/" && !e.target.closest("input")) {
@@ -34,48 +31,36 @@ export default function Topbar() {
         setCommandOpen(true);
       }
     };
-
     window.addEventListener("keydown", handler);
     return () => window.removeEventListener("keydown", handler);
   }, []);
 
-  // ------------------------------------------------------
-  // AUTO-CLOSE MENUS ON PAGE SCROLL
-  // ------------------------------------------------------
-  useEffect(() => {
-    const close = () => {
-      setProfileOpen(false);
-      setNotificationsOpen(false);
-    };
-    window.addEventListener("scroll", close);
-    return () => window.removeEventListener("scroll", close);
-  }, []);
-
   return (
     <>
-      <header className="h-16 flex items-center justify-between px-6 border-b bg-card relative z-30 shadow-sm">
-        {/* -------------------- LEFT -------------------- */}
-        <div className="flex items-center gap-4">
-          {/* Page Title */}
-          <div className="text-lg font-semibold tracking-tight">Overview</div>
+      <header className="h-16 flex items-center justify-between px-6 border-b bg-card shadow-sm relative z-30">
+        
+        {/* LEFT */}
+        <div className="flex items-center gap-6">
+          <h1 className="text-lg font-semibold tracking-tight">
+            Dashboard
+          </h1>
 
-          {/* Search */}
-          <div className="hidden md:flex">
+          {/* Animated Search Input */}
+          <div className="hidden lg:block">
             <SearchInput searchRef={searchRef} />
           </div>
         </div>
 
-        {/* -------------------- RIGHT ------------------- */}
-        <div className="flex items-center gap-4">
+        {/* RIGHT */}
+        <div className="flex items-center gap-3">
 
-          {/* Theme Toggle */}
-          <motion.button
-            whileTap={{ scale: 0.9 }}
+          {/* Theme toggle */}
+          <button
             onClick={toggle}
             className="p-2 rounded hover:bg-muted transition"
           >
             {theme === "dark" ? <Sun size={18} /> : <Moon size={18} />}
-          </motion.button>
+          </button>
 
           {/* Notifications */}
           <NotificationsMenu
@@ -84,7 +69,7 @@ export default function Topbar() {
             closeProfile={() => setProfileOpen(false)}
           />
 
-          {/* Profile Menu */}
+          {/* Profile */}
           <ProfileMenu
             open={profileOpen}
             setOpen={setProfileOpen}
@@ -93,7 +78,7 @@ export default function Topbar() {
         </div>
       </header>
 
-      {/* GLOBAL COMMAND PALETTE */}
+      {/* Command Palette */}
       <CommandPalette open={commandOpen} onClose={setCommandOpen} />
     </>
   );

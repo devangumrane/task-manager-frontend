@@ -1,21 +1,23 @@
 import axios from "axios";
 import { useAuthStore } from "../store/authStore";
 
-const BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:8000/api/v1";
+const BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:8000";
 
 const api = axios.create({
-  baseURL: BASE_URL,
-  withCredentials: true, // MUST BE TRUE for cookie refresh
+  baseURL: `${BASE_URL}/api/v1`,
+  withCredentials: true,
 });
 
 // Attach access token
 api.interceptors.request.use((config) => {
-  const token = localStorage.getItem("token");
-  if (token) config.headers.Authorization = `Bearer ${token}`;
+  const token = useAuthStore.getState().accessToken;
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`;
+  }
   return config;
 });
 
-// Refresh on 401
+// Auto-refresh on 401
 api.interceptors.response.use(
   (res) => res,
   async (err) => {
@@ -26,21 +28,23 @@ api.interceptors.response.use(
 
       try {
         const refreshRes = await axios.post(
-          `${BASE_URL}/auth/refresh`,
+          `${BASE_URL}/api/v1/auth/refresh`,
           {},
           { withCredentials: true }
         );
 
-        const newAccess = refreshRes.data.data.accessToken;
+        const newAccessToken = refreshRes.data.data.accessToken;
 
-        localStorage.setItem("token", newAccess);
-        useAuthStore.setState({ accessToken: newAccess });
+        // update store (writes localStorage)
+        const store = useAuthStore.getState();
+        store.setAuth(newAccessToken, store.user);
 
-        original.headers.Authorization = `Bearer ${newAccess}`;
+        // Retry request
+        original.headers.Authorization = `Bearer ${newAccessToken}`;
         return api(original);
-      } catch (e) {
+      } catch (refreshErr) {
         useAuthStore.getState().clearAuth();
-        return Promise.reject(e);
+        return Promise.reject(refreshErr);
       }
     }
 

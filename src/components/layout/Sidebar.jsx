@@ -1,13 +1,13 @@
-// src/components/layout/Sidebar.jsx
 import React, { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { Menu, Home, Grid, Users, FileText } from "lucide-react";
+import { ROUTES } from "../../router/paths";
 
 const nav = [
-  { label: "Dashboard", to: "/", icon: Home },
-  { label: "Workspaces", to: "/workspaces", icon: Users },
-  { label: "Projects", to: "/projects", icon: Grid },
-  { label: "Activity", to: "/activity", icon: FileText },
+  { label: "Dashboard", to: ROUTES.DASHBOARD, icon: Home },
+  { label: "Workspaces", to: ROUTES.WORKSPACES, icon: Users },
+  { label: "Projects", to: ROUTES.PROJECTS, icon: Grid },
+  { label: "Activity", to: ROUTES.ACTIVITY, icon: FileText },
 ];
 
 export default function Sidebar() {

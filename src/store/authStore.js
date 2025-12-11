@@ -15,6 +15,8 @@ export const useAuthStore = create((set) => ({
   user: safeParseUser(),
 
   setAuth: (accessToken, user) => {
+    if (!user) user = useAuthStore.getState().user;
+
     localStorage.setItem("token", accessToken);
     localStorage.setItem("user", JSON.stringify(user));
 

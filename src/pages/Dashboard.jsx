@@ -9,14 +9,17 @@ import { useAuthStore } from "../store/authStore";
 
 export default function Dashboard() {
   const navigate = useNavigate();
-  const logout = useAuthStore((s) => s.logout);
+  const { clearAuth } = useAuthStore();
 
   const { data: workspaces = [], isLoading } = useWorkspaces();
+
+  // FIX: normalize backend response shape
+  // const workspaces = Array.isArray(data?.data) ? data.data : [];
 
   const [openDialog, setOpenDialog] = useState(false);
 
   const handleRowClick = (workspace) => {
-    navigate(`/workspace/${workspace.id}`);
+    navigate(`/workspaces/${workspace.id}`);
   };
 
   return (
@@ -29,8 +32,8 @@ export default function Dashboard() {
             variant="outline"
             size="sm"
             onClick={() => {
-              logout();
-              navigate("/login");
+              clearAuth();
+              navigate("/login", { replace: true });
             }}
           >
             Logout
@@ -57,9 +60,9 @@ export default function Dashboard() {
           onRowClick={handleRowClick}
         />
 
-        <CreateWorkspaceDialog 
-          open={openDialog} 
-          onClose={() => setOpenDialog(false)} 
+        <CreateWorkspaceDialog
+          open={openDialog}
+          onClose={() => setOpenDialog(false)}
         />
       </main>
     </div>
