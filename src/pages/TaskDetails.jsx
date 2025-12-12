@@ -2,6 +2,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { getTaskById, getTaskAttachments } from "../services/taskService";
 import { ArrowLeft } from "lucide-react";
+import { ROUTES } from "../router/paths";
 
 export default function TaskDetails() {
   const { workspaceId, projectId, taskId } = useParams();
@@ -24,7 +25,7 @@ export default function TaskDetails() {
     <div className="space-y-6">
       {/* Back */}
       <button
-        onClick={() => navigate(-1)}
+        onClick={() => navigate(ROUTES.TASK(workspaceId, projectId, task.id))}
         className="flex items-center gap-2 text-gray-600 hover:text-black"
       >
         <ArrowLeft size={20} />

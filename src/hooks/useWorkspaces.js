@@ -11,14 +11,12 @@ export const useWorkspaces = () => {
     queryFn: async () => {
       const res = await listWorkspaces();
 
-      // BACKEND FORMAT:
-      // { success: true, data: { workspaces: [...] } }
+      // Backend shape:
+      // { success: true, data: [ ... ] }
 
-      if (!res || !res.data || !Array.isArray(res.data.workspaces)) {
-        return []; // NEVER return undefined
-      }
+      const workspaces = res?.data;
 
-      return res.data.workspaces;
+      return Array.isArray(workspaces) ? workspaces : [];
     },
   });
 };

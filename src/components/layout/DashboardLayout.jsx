@@ -1,6 +1,7 @@
 import { Outlet } from "react-router-dom";
 import Sidebar from "./Sidebar";
 import Topbar from "./Topbar";
+import Breadcrumbs from "./Breadcrumbs";
 
 export default function DashboardLayout() {
   return (
@@ -11,6 +12,7 @@ export default function DashboardLayout() {
         <Topbar />
 
         <main className="flex-1 overflow-auto p-6">
+          <Breadcrumbs />
           <Outlet />
         </main>
       </div>

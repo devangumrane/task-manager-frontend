@@ -1,12 +1,23 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import {
-  getTaskById,
-} from "../services/taskService";
+import { getTasksByProject, createTask } from "../services/taskService";
 
-export const useTask = (wsId, pId, taskId) => {
+export const useProjectTasks = (workspaceId, projectId) => {
   return useQuery({
-    queryKey: ["task", wsId, pId, taskId],
-    queryFn: () => getTaskById(wsId, pId, taskId),
-    enabled: !!wsId && !!pId && !!taskId,
+    queryKey: ["projectTasks", workspaceId, projectId],
+    queryFn: () => getTasksByProject(workspaceId, projectId),
+    enabled: !!workspaceId && !!projectId,
+  });
+};
+
+export const useCreateTask = (workspaceId, projectId) => {
+  const qc = useQueryClient();
+
+  return useMutation({
+    mutationFn: (payload) => createTask(workspaceId, projectId, payload),
+
+    onSuccess: () => {
+      // Refresh Kanban board
+      qc.invalidateQueries(["projectTasks", workspaceId, projectId]);
+    },
   });
 };

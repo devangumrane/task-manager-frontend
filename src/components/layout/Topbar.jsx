@@ -1,4 +1,3 @@
-// src/components/layout/Topbar.jsx
 import { useRef, useState, useEffect } from "react";
 import { Search, Bell, Sun, Moon } from "lucide-react";
 import { useTheme } from "../ThemeProvider";
@@ -8,12 +7,18 @@ import NotificationsMenu from "../topbar/NotificationsMenu";
 import ProfileMenu from "../topbar/ProfileMenu";
 import CommandPalette from "../topbar/CommandPalette";
 
+import { useLocation } from "react-router-dom";
+import { ROUTES } from "../../router/paths";
+
 export default function Topbar() {
   const { theme, toggle } = useTheme();
 
   const [profileOpen, setProfileOpen] = useState(false);
   const [notificationsOpen, setNotificationsOpen] = useState(false);
   const [commandOpen, setCommandOpen] = useState(false);
+
+  const { pathname } = useLocation();
+  const title = getPageTitle(pathname);
 
   const searchRef = useRef(null);
 
@@ -35,15 +40,30 @@ export default function Topbar() {
     return () => window.removeEventListener("keydown", handler);
   }, []);
 
+  function getPageTitle(pathname) {
+    if (pathname === ROUTES.DASHBOARD) return "Dashboard";
+
+    if (pathname.startsWith(ROUTES.WORKSPACES)) {
+      return pathname === ROUTES.WORKSPACES
+        ? "Workspaces"
+        : "Workspace Details";
+    }
+
+    if (pathname.startsWith(ROUTES.PROJECTS)) {
+      return pathname === ROUTES.PROJECTS ? "Projects" : "Project Details";
+    }
+
+    if (pathname.startsWith(ROUTES.ACTIVITY)) return "Activity";
+
+    return "Task Manager";
+  }
+
   return (
     <>
       <header className="h-16 flex items-center justify-between px-6 border-b bg-card shadow-sm relative z-30">
-        
         {/* LEFT */}
         <div className="flex items-center gap-6">
-          <h1 className="text-lg font-semibold tracking-tight">
-            Dashboard
-          </h1>
+          <h1 className="text-lg font-semibold tracking-tight">{title}</h1>
 
           {/* Animated Search Input */}
           <div className="hidden lg:block">
@@ -53,7 +73,6 @@ export default function Topbar() {
 
         {/* RIGHT */}
         <div className="flex items-center gap-3">
-
           {/* Theme toggle */}
           <button
             onClick={toggle}

@@ -6,6 +6,7 @@ import CreateWorkspaceDialog from "../components/workspaces/CreateWorkspaceDialo
 import ThemeToggle from "../components/ThemeToggle";
 import { Button } from "../components/ui/button";
 import { useAuthStore } from "../store/authStore";
+import { ROUTES } from "../router/paths";
 
 export default function Dashboard() {
   const navigate = useNavigate();
@@ -19,7 +20,7 @@ export default function Dashboard() {
   const [openDialog, setOpenDialog] = useState(false);
 
   const handleRowClick = (workspace) => {
-    navigate(`/workspaces/${workspace.id}`);
+    navigate(ROUTES.WORKSPACE(workspace.id));
   };
 
   return (

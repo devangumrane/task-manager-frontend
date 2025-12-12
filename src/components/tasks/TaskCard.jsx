@@ -1,12 +1,13 @@
 // src/components/tasks/TaskCard.jsx
 import { Link, useParams } from "react-router-dom";
+import { ROUTES } from "../../router/paths";
 
 export default function TaskCard({ task }) {
   const { workspaceId, projectId } = useParams();
 
   return (
     <Link
-      to={`/workspaces/${workspaceId}/projects/${projectId}/tasks/${task.id}`}
+      to={ROUTES.TASK(workspaceId, projectId, task.id)}
       className="block"
     >
       <div className="p-4 bg-white shadow rounded-lg hover:bg-gray-50 transition">

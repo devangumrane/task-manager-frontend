@@ -3,6 +3,7 @@ import { useState } from "react";
 import { useProjects } from "../hooks/useProjects";
 import { Button } from "../components/ui/button";
 import CreateProjectDialog from "../components/projects/CreateProjectDialog";
+import { ROUTES } from "../router/paths";
 
 export default function WorkspaceDetails() {
   const { workspaceId } = useParams();
@@ -28,9 +29,7 @@ export default function WorkspaceDetails() {
             <li
               key={project.id}
               className="cursor-pointer p-3 bg-card rounded-lg border hover:bg-secondary"
-              onClick={() =>
-                navigate(`/workspaces/${workspaceId}/projects/${project.id}`)
-              }
+              onClick={() => navigate(ROUTES.PROJECT(workspaceId, project.id))}
             >
               {project.name}
             </li>

@@ -6,30 +6,43 @@ import {
   listProjects,
 } from "../services/projectService";
 
+// LIST PROJECTS FOR WORKSPACE
 export const useProjects = (workspaceId) => {
   return useQuery({
     queryKey: ["workspaceProjects", workspaceId],
-    queryFn: () => listProjects(workspaceId),
+    queryFn: async () => {
+      const res = await listProjects(workspaceId);
+      return Array.isArray(res?.data) ? res.data : []; // FIXED
+    },
     enabled: !!workspaceId,
   });
 };
 
+// GET SINGLE PROJECT
 export const useProject = (workspaceId, projectId) => {
   return useQuery({
     queryKey: ["project", workspaceId, projectId],
-    queryFn: () => getProjectById(workspaceId, projectId),
+    queryFn: async () => {
+      const res = await getProjectById(workspaceId, projectId);
+      return res?.data ?? null; // FIXED
+    },
     enabled: !!workspaceId && !!projectId,
   });
 };
 
+// GET TASKS FOR PROJECT
 export const useProjectTasks = (workspaceId, projectId) => {
   return useQuery({
     queryKey: ["projectTasks", workspaceId, projectId],
-    queryFn: () => getTasksByProject(workspaceId, projectId),
+    queryFn: async () => {
+      const res = await getTasksByProject(workspaceId, projectId);
+      return Array.isArray(res?.data) ? res.data : []; // FIXED
+    },
     enabled: !!workspaceId && !!projectId,
   });
 };
 
+// CREATE PROJECT
 export const useCreateProject = (workspaceId) => {
   const qc = useQueryClient();
 
