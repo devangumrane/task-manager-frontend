@@ -17,10 +17,23 @@ import ProjectDetails from "./pages/ProjectDetails";
 import TaskDetails from "./pages/TaskDetails";
 import ActivityPage from "./pages/ActivityPage";
 
+/* ---------------- PROTECTED LAYOUT ---------------- */
+
 function ProtectedLayout() {
   const token = useAuthStore((s) => s.accessToken);
-  return token ? <DashboardLayout /> : <Navigate to={ROUTES.LOGIN} replace />;
+
+  if (!token) {
+    return <Navigate to={ROUTES.LOGIN} replace />;
+  }
+
+  return (
+    <DashboardLayout>
+      <Outlet />
+    </DashboardLayout>
+  );
 }
+
+/* ---------------- APP ROUTES ---------------- */
 
 export default function App() {
   return (

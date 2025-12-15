@@ -21,9 +21,10 @@ api.interceptors.request.use((config) => {
 api.interceptors.response.use(
   (res) => res,
   async (err) => {
+    const status = err.response?.status;
     const original = err.config;
 
-    if (err.response?.status === 401 && !original._retry) {
+    if (status === 401 && !original?._retry) {
       original._retry = true;
 
       try {
@@ -33,18 +34,16 @@ api.interceptors.response.use(
           { withCredentials: true }
         );
 
-        const newAccessToken = refreshRes.data.data.accessToken;
+        const newToken = refreshRes.data?.data?.accessToken;
+        if (!newToken) throw new Error("No token");
 
-        // update store (writes localStorage)
-        const store = useAuthStore.getState();
-        store.setAuth(newAccessToken, store.user);
+        useAuthStore.getState().setAuth(newToken, null);
 
-        // Retry request
-        original.headers.Authorization = `Bearer ${newAccessToken}`;
+        original.headers.Authorization = `Bearer ${newToken}`;
         return api(original);
-      } catch (refreshErr) {
+      } catch {
         useAuthStore.getState().clearAuth();
-        return Promise.reject(refreshErr);
+        return Promise.reject(err);
       }
     }
 

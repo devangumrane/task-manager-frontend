@@ -6,43 +6,61 @@ import TaskCard from "../components/tasks/TaskCard";
 import { ArrowLeft } from "lucide-react";
 import { ROUTES } from "../router/paths";
 import CreateTaskDialog from "../components/tasks/CreateTaskDialog";
+import { useUpdateTaskStatus } from "../hooks/useTasks";
 
 export default function ProjectDetails() {
   const { workspaceId, projectId } = useParams();
   const navigate = useNavigate();
 
+  // ✅ ALL HOOKS FIRST (NO RETURNS BEFORE THIS)
   const [openTaskDialog, setOpenTaskDialog] = useState(false);
+  const updateTaskStatus = useUpdateTaskStatus(workspaceId, projectId);
 
-  // --- PROJECT QUERY ---
   const { data: rawProject, isLoading: loadingProject } = useQuery({
     queryKey: ["project", workspaceId, projectId],
     queryFn: () => getProjectById(workspaceId, projectId),
   });
 
-  // Normalize API response shape
-  const project = rawProject?.data || rawProject || null;
-
-  // --- TASKS QUERY ---
-  const { data: rawTasks, isLoading: loadingTasks } = useQuery({
+  const { data: rawTasks = [], isLoading: loadingTasks } = useQuery({
     queryKey: ["projectTasks", workspaceId, projectId],
     queryFn: () => getTasksByProject(workspaceId, projectId),
   });
 
+  // ✅ Normalize AFTER hooks
+  const project = rawProject?.data || rawProject || null;
   const tasks = Array.isArray(rawTasks?.data) ? rawTasks.data : rawTasks || [];
 
+  // ✅ EARLY RETURNS AFTER ALL HOOKS
   if (loadingProject) return <p>Loading project…</p>;
   if (!project) return <p>Project not found.</p>;
 
-  // --- Kanban Columns ---
   const columns = {
     todo: tasks.filter((t) => t.status === "todo"),
     in_progress: tasks.filter((t) => t.status === "in_progress"),
     done: tasks.filter((t) => t.status === "done"),
   };
 
+  const handleDragStart = (e, task) => {
+    e.dataTransfer.setData("taskId", String(task.id));
+    e.dataTransfer.setData("fromStatus", task.status);
+  };
+
+  const handleDropTask = (e, newStatus) => {
+    e.preventDefault();
+
+    const taskId = e.dataTransfer.getData("taskId");
+    const fromStatus = e.dataTransfer.getData("fromStatus");
+
+    if (!taskId || fromStatus === newStatus) return;
+
+    updateTaskStatus.mutate({
+      taskId: Number(taskId),
+      payload: { status: newStatus },
+    });
+  };
+
   return (
     <div className="space-y-6">
-      {/* Back */}
       <button
         onClick={() => navigate(ROUTES.WORKSPACE(workspaceId))}
         className="flex items-center gap-2 text-gray-600 hover:text-black"
@@ -51,18 +69,15 @@ export default function ProjectDetails() {
         Back
       </button>
 
-      {/* Project Header */}
       <div className="bg-white shadow rounded-xl p-6">
         <h1 className="text-2xl font-semibold">
           {project.title || project.name}
         </h1>
-
         {project.description && (
           <p className="text-gray-600 mt-2">{project.description}</p>
         )}
       </div>
 
-      {/* Tasks Header */}
       <div className="flex items-center justify-between">
         <h2 className="text-xl font-semibold">Tasks</h2>
         <button
@@ -73,14 +88,19 @@ export default function ProjectDetails() {
         </button>
       </div>
 
-      {/* Kanban Board */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-4">
-        <KanbanColumn title="Todo" tasks={columns.todo} />
-        <KanbanColumn title="In Progress" tasks={columns.in_progress} />
-        <KanbanColumn title="Done" tasks={columns.done} />
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        {Object.entries(columns).map(([status, list]) => (
+          <KanbanColumn
+            key={status}
+            title={status.replace("_", " ").toUpperCase()}
+            status={status}
+            tasks={list}
+            onDragStart={handleDragStart}
+            onDrop={handleDropTask}
+          />
+        ))}
       </div>
 
-      {/* Create Task Dialog */}
       <CreateTaskDialog
         open={openTaskDialog}
         onClose={() => setOpenTaskDialog(false)}
@@ -91,14 +111,18 @@ export default function ProjectDetails() {
   );
 }
 
-function KanbanColumn({ title, tasks }) {
+function KanbanColumn({ title, status, tasks, onDragStart, onDrop }) {
   return (
-    <div className="bg-gray-50 p-4 rounded-lg border min-h-[300px]">
+    <div
+      className="bg-gray-50 p-4 rounded-lg border min-h-[300px]"
+      onDragOver={(e) => e.preventDefault()}
+      onDrop={(e) => onDrop(e, status)}
+    >
       <h3 className="font-semibold mb-3">{title}</h3>
 
       <div className="space-y-3">
         {tasks.map((task) => (
-          <TaskCard key={task.id} task={task} />
+          <TaskCard key={task.id} task={task} onDragStart={onDragStart} />
         ))}
 
         {tasks.length === 0 && (

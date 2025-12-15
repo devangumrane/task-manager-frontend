@@ -2,18 +2,19 @@
 import { Link, useParams } from "react-router-dom";
 import { ROUTES } from "../../router/paths";
 
-export default function TaskCard({ task }) {
-  const { workspaceId, projectId } = useParams();
-
+export default function TaskCard({ task, onDragStart }) {
   return (
-    <Link
-      to={ROUTES.TASK(workspaceId, projectId, task.id)}
-      className="block"
+    <div
+      draggable
+      onDragStart={(e) => {
+        if (typeof onDragStart === "function") {
+          onDragStart(e, task);
+        }
+      }}
+      className="p-4 bg-white shadow rounded-lg cursor-grab hover:bg-gray-50 transition"
     >
-      <div className="p-4 bg-white shadow rounded-lg hover:bg-gray-50 transition">
-        <h3 className="font-semibold">{task.title}</h3>
-        <p className="text-sm text-gray-600">{task.status}</p>
-      </div>
-    </Link>
+      <h3 className="font-semibold">{task.title}</h3>
+      <p className="text-sm text-gray-600">{task.status}</p>
+    </div>
   );
 }

@@ -1,4 +1,3 @@
-// src/components/layout/Breadcrumbs.jsx
 import { Link, useLocation, useParams } from "react-router-dom";
 import { ChevronRight, Home, Folder, Layers, FileText } from "lucide-react";
 import { ROUTES } from "../../router/paths";
