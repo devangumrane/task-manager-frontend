@@ -10,7 +10,10 @@ import {
 export const useProjectTasks = (workspaceId, projectId) => {
   return useQuery({
     queryKey: ["projectTasks", workspaceId, projectId],
-    queryFn: () => getTasksByProject(workspaceId, projectId),
+    queryFn: async () => {
+      const res = await getTasksByProject(workspaceId, projectId);
+      return Array.isArray(res) ? res : res?.data ?? [];
+    },
     enabled: !!workspaceId && !!projectId,
   });
 };
@@ -39,12 +42,39 @@ export const useUpdateTaskStatus = (workspaceId, projectId) => {
 
   return useMutation({
     mutationFn: ({ taskId, payload }) =>
-      api.patch(
-        `/workspaces/${workspaceId}/projects/${projectId}/tasks/${taskId}`,
-        payload
-      ),
+      updateTaskStatus(workspaceId, projectId, taskId, payload),
 
-    onSuccess: () => {
+    // 🚀 OPTIMISTIC UPDATE
+    onMutate: async ({ taskId, payload }) => {
+      await qc.cancelQueries(["projectTasks", workspaceId, projectId]);
+
+      const previousTasks = qc.getQueryData([
+        "projectTasks",
+        workspaceId,
+        projectId,
+      ]);
+
+      qc.setQueryData(["projectTasks", workspaceId, projectId], (old) => {
+        if (!Array.isArray(old)) return old;
+
+        return old.map((task) =>
+          task.id === taskId ? { ...task, ...payload } : task
+        );
+      });
+
+      return { previousTasks };
+    },
+
+    // ❌ ROLLBACK ON ERROR
+    onError: (_err, _vars, context) => {
+      qc.setQueryData(
+        ["projectTasks", workspaceId, projectId],
+        context.previousTasks
+      );
+    },
+
+    // ✅ SYNC WITH SERVER
+    onSettled: () => {
       qc.invalidateQueries(["projectTasks", workspaceId, projectId]);
     },
   });

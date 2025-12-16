@@ -50,12 +50,17 @@ export default function ProjectDetails() {
 
     const taskId = e.dataTransfer.getData("taskId");
     const fromStatus = e.dataTransfer.getData("fromStatus");
+    const STATUS_MAP = {
+      todo: "TODO",
+      in_progress: "IN_PROGRESS",
+      done: "DONE",
+    };
 
     if (!taskId || fromStatus === newStatus) return;
 
     updateTaskStatus.mutate({
       taskId: Number(taskId),
-      payload: { status: newStatus },
+      payload: { status: STATUS_MAP[newStatus] },
     });
   };
 

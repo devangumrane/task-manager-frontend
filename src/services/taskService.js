@@ -34,12 +34,11 @@ export const updateTaskStatus = async (
   workspaceId,
   projectId,
   taskId,
-  status
+  payload
 ) => {
   const res = await api.patch(
     `/workspaces/${workspaceId}/projects/${projectId}/tasks/${taskId}`,
-    { status }
+    payload
   );
-
   return res.data.data;
 };
