@@ -42,7 +42,7 @@ export default function ProjectDetails() {
 
   const handleDragStart = (e, task) => {
     e.dataTransfer.setData("taskId", String(task.id));
-    e.dataTransfer.setData("fromStatus", task.status);
+    e.dataTransfer.setData("fromStatus", task.status.toLowerCase());
   };
 
   const handleDropTask = (e, newStatus) => {
@@ -58,9 +58,14 @@ export default function ProjectDetails() {
 
     if (!taskId || fromStatus === newStatus) return;
 
-    updateTaskStatus.mutate({
+    console.log("PATCH PAYLOAD", {
       taskId: Number(taskId),
       payload: { status: STATUS_MAP[newStatus] },
+    });
+
+    updateTaskStatus.mutate({
+      taskId: Number(taskId),
+      status: STATUS_MAP[newStatus],
     });
   };
 

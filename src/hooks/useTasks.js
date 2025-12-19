@@ -41,11 +41,17 @@ export const useUpdateTaskStatus = (workspaceId, projectId) => {
   const qc = useQueryClient();
 
   return useMutation({
-    mutationFn: ({ taskId, payload }) =>
-      updateTaskStatus(workspaceId, projectId, taskId, payload),
+    // 🔒 HARD CONTRACT: ONLY status allowed
+    mutationFn: ({ taskId, status }) =>
+      updateTaskStatus(
+        workspaceId,
+        projectId,
+        taskId,
+        { status } // <-- EXACT backend schema
+      ),
 
     // 🚀 OPTIMISTIC UPDATE
-    onMutate: async ({ taskId, payload }) => {
+    onMutate: async ({ taskId, status }) => {
       await qc.cancelQueries(["projectTasks", workspaceId, projectId]);
 
       const previousTasks = qc.getQueryData([
@@ -54,26 +60,26 @@ export const useUpdateTaskStatus = (workspaceId, projectId) => {
         projectId,
       ]);
 
-      qc.setQueryData(["projectTasks", workspaceId, projectId], (old) => {
-        if (!Array.isArray(old)) return old;
-
-        return old.map((task) =>
-          task.id === taskId ? { ...task, ...payload } : task
-        );
-      });
+      qc.setQueryData(
+        ["projectTasks", workspaceId, projectId],
+        (old = []) =>
+          old.map((task) =>
+            task.id === taskId ? { ...task, status } : task
+          )
+      );
 
       return { previousTasks };
     },
 
-    // ❌ ROLLBACK ON ERROR
-    onError: (_err, _vars, context) => {
+    // ❌ ROLLBACK
+    onError: (_err, _vars, ctx) => {
       qc.setQueryData(
         ["projectTasks", workspaceId, projectId],
-        context.previousTasks
+        ctx?.previousTasks
       );
     },
 
-    // ✅ SYNC WITH SERVER
+    // ✅ FINAL SYNC
     onSettled: () => {
       qc.invalidateQueries(["projectTasks", workspaceId, projectId]);
     },
