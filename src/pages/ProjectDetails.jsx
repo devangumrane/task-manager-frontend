@@ -1,76 +1,54 @@
 import { useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
-import { getProjectById, getTasksByProject } from "../services/projectService";
-import TaskCard from "../components/tasks/TaskCard";
 import { ArrowLeft } from "lucide-react";
-import { ROUTES } from "../router/paths";
+
+import { getProjectById } from "../services/projectService";
+import { useProjectTasks, useUpdateTaskStatus } from "../hooks/useTasks";
+
+import TaskCard from "../components/tasks/TaskCard";
 import CreateTaskDialog from "../components/tasks/CreateTaskDialog";
-import { useUpdateTaskStatus } from "../hooks/useTasks";
+import { ROUTES } from "../router/paths";
 
 export default function ProjectDetails() {
   const { workspaceId, projectId } = useParams();
   const navigate = useNavigate();
 
-  // ✅ ALL HOOKS FIRST (NO RETURNS BEFORE THIS)
+  // ---------------- STATE ----------------
   const [openTaskDialog, setOpenTaskDialog] = useState(false);
-  const updateTaskStatus = useUpdateTaskStatus(workspaceId, projectId);
 
+  // ---------------- DATA ----------------
   const { data: rawProject, isLoading: loadingProject } = useQuery({
     queryKey: ["project", workspaceId, projectId],
     queryFn: () => getProjectById(workspaceId, projectId),
+    enabled: !!workspaceId && !!projectId,
   });
 
-  const { data: rawTasks = [], isLoading: loadingTasks } = useQuery({
-    queryKey: ["projectTasks", workspaceId, projectId],
-    queryFn: () => getTasksByProject(workspaceId, projectId),
-  });
+  const {
+    data: tasks = [],
+    isLoading: loadingTasks,
+  } = useProjectTasks(workspaceId, projectId);
 
-  // ✅ Normalize AFTER hooks
-  const project = rawProject?.data || rawProject || null;
-  const tasks = Array.isArray(rawTasks?.data) ? rawTasks.data : rawTasks || [];
+  const updateTaskStatus = useUpdateTaskStatus(workspaceId, projectId);
 
-  // ✅ EARLY RETURNS AFTER ALL HOOKS
-  if (loadingProject) return <p>Loading project…</p>;
-  if (!project) return <p>Project not found.</p>;
+  // ---------------- NORMALIZE ----------------
+  const project = rawProject?.data ?? rawProject ?? null;
 
+  // ---------------- GUARDS ----------------
+  if (loadingProject || loadingTasks) return <p>Loading…</p>;
+  if (!project) return <p>Project not found</p>;
+
+  // ---------------- STRICT BACKEND ENUMS ----------------
   const columns = {
     todo: tasks.filter((t) => t.status === "todo"),
     in_progress: tasks.filter((t) => t.status === "in_progress"),
     done: tasks.filter((t) => t.status === "done"),
   };
 
-  const handleDragStart = (e, task) => {
-    e.dataTransfer.setData("taskId", String(task.id));
-    e.dataTransfer.setData("fromStatus", task.status.toLowerCase());
-  };
-
-  const handleDropTask = (e, newStatus) => {
-    e.preventDefault();
-
-    const taskId = e.dataTransfer.getData("taskId");
-    const fromStatus = e.dataTransfer.getData("fromStatus");
-    const STATUS_MAP = {
-      todo: "TODO",
-      in_progress: "IN_PROGRESS",
-      done: "DONE",
-    };
-
-    if (!taskId || fromStatus === newStatus) return;
-
-    console.log("PATCH PAYLOAD", {
-      taskId: Number(taskId),
-      payload: { status: STATUS_MAP[newStatus] },
-    });
-
-    updateTaskStatus.mutate({
-      taskId: Number(taskId),
-      status: STATUS_MAP[newStatus],
-    });
-  };
-
+  // ---------------- UI ----------------
   return (
     <div className="space-y-6">
+      {/* Back */}
       <button
         onClick={() => navigate(ROUTES.WORKSPACE(workspaceId))}
         className="flex items-center gap-2 text-gray-600 hover:text-black"
@@ -79,66 +57,64 @@ export default function ProjectDetails() {
         Back
       </button>
 
+      {/* Header */}
       <div className="bg-white shadow rounded-xl p-6">
         <h1 className="text-2xl font-semibold">
           {project.title || project.name}
         </h1>
-        {project.description && (
-          <p className="text-gray-600 mt-2">{project.description}</p>
-        )}
       </div>
 
+      {/* Tasks header */}
       <div className="flex items-center justify-between">
         <h2 className="text-xl font-semibold">Tasks</h2>
         <button
-          className="px-3 py-1 text-sm bg-primary text-white rounded"
           onClick={() => setOpenTaskDialog(true)}
+          className="px-3 py-1 bg-primary text-white rounded"
         >
           + Task
         </button>
       </div>
 
+      {/* Columns */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         {Object.entries(columns).map(([status, list]) => (
-          <KanbanColumn
+          <div
             key={status}
-            title={status.replace("_", " ").toUpperCase()}
-            status={status}
-            tasks={list}
-            onDragStart={handleDragStart}
-            onDrop={handleDropTask}
-          />
+            className="bg-gray-50 p-4 rounded-lg border min-h-[200px]"
+          >
+            <h3 className="font-semibold mb-3">
+              {status.replace("_", " ")}
+            </h3>
+
+            <div className="space-y-3">
+              {list.map((task) => (
+                <TaskCard
+                  key={task.id}
+                  task={task}
+                  onStatusChange={(taskId, nextStatus) =>
+                    updateTaskStatus.mutate({
+                      taskId,
+                      status: nextStatus,
+                    })
+                  }
+                />
+              ))}
+
+              {list.length === 0 && (
+                <p className="text-sm text-gray-500">No tasks</p>
+              )}
+            </div>
+          </div>
         ))}
       </div>
 
+      {/* Create Task Dialog */}
       <CreateTaskDialog
         open={openTaskDialog}
         onClose={() => setOpenTaskDialog(false)}
         workspaceId={workspaceId}
         projectId={projectId}
       />
-    </div>
-  );
-}
-
-function KanbanColumn({ title, status, tasks, onDragStart, onDrop }) {
-  return (
-    <div
-      className="bg-gray-50 p-4 rounded-lg border min-h-[300px]"
-      onDragOver={(e) => e.preventDefault()}
-      onDrop={(e) => onDrop(e, status)}
-    >
-      <h3 className="font-semibold mb-3">{title}</h3>
-
-      <div className="space-y-3">
-        {tasks.map((task) => (
-          <TaskCard key={task.id} task={task} onDragStart={onDragStart} />
-        ))}
-
-        {tasks.length === 0 && (
-          <p className="text-sm text-gray-500">No tasks</p>
-        )}
-      </div>
     </div>
   );
 }

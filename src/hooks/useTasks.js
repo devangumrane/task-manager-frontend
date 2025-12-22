@@ -41,7 +41,7 @@ export const useUpdateTaskStatus = (workspaceId, projectId) => {
   const qc = useQueryClient();
 
   return useMutation({
-    // 🔒 HARD CONTRACT: ONLY status allowed
+    // HARD CONTRACT: ONLY status allowed
     mutationFn: ({ taskId, status }) =>
       updateTaskStatus(
         workspaceId,
@@ -50,7 +50,7 @@ export const useUpdateTaskStatus = (workspaceId, projectId) => {
         { status } // <-- EXACT backend schema
       ),
 
-    // 🚀 OPTIMISTIC UPDATE
+    // OPTIMISTIC UPDATE
     onMutate: async ({ taskId, status }) => {
       await qc.cancelQueries(["projectTasks", workspaceId, projectId]);
 
@@ -71,7 +71,7 @@ export const useUpdateTaskStatus = (workspaceId, projectId) => {
       return { previousTasks };
     },
 
-    // ❌ ROLLBACK
+    // ROLLBACK
     onError: (_err, _vars, ctx) => {
       qc.setQueryData(
         ["projectTasks", workspaceId, projectId],
@@ -79,7 +79,7 @@ export const useUpdateTaskStatus = (workspaceId, projectId) => {
       );
     },
 
-    // ✅ FINAL SYNC
+    // FINAL SYNC
     onSettled: () => {
       qc.invalidateQueries(["projectTasks", workspaceId, projectId]);
     },
