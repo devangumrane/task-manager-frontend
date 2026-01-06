@@ -16,8 +16,8 @@ export const useAuth = () => {
     mutationFn: loginApi,
     onSuccess: (res) => {
       const { user, accessToken } = res.data.data;
-      useAuthStore.getState().setAuth(accessToken, user);
-
+      setAuth(accessToken, user);
+      qc.invalidateQueries(); // 🔑 ensure fresh data
       toast.success("Logged in successfully");
     },
     onError: (err) => {

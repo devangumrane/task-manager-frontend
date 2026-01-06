@@ -1,14 +1,19 @@
-// src/services/authService.js
-import api from "./api";
+import api from "../api/axios";
 
+// ---------------- LOGIN ----------------
 export const login = async (payload) => {
-  return api.post("/auth/login", payload);
+  const res = await api.post("/api/v1/auth/login", payload);
+  return res;
 };
 
+// ---------------- REGISTER ----------------
 export const register = async (payload) => {
-  return api.post("/auth/register", payload);
+  const res = await api.post("/api/v1/auth/register", payload);
+  return res;
 };
 
+// ---------------- LOGOUT ----------------
 export const logout = async () => {
-  return api.post("/auth/logout");
+  const res = await api.post("/api/auth/logout");
+  return res;
 };

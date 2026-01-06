@@ -1,22 +1,33 @@
 import { create } from "zustand";
 
 export const useAuthStore = create((set) => ({
-  accessToken: null,
+
+  // STATE
+  accessToken: localStorage.getItem("token"),
   user: null,
   isBootstrapped: false,
 
+  // ACTIONS
   setAuth: (token, user) => {
-    set({ accessToken: token, user });
     localStorage.setItem("token", token);
+    set({
+      accessToken: token,
+      user,
+      isBootstrapped: true,
+    });
   },
 
   clearAuth: () => {
     localStorage.removeItem("token");
-    set({ accessToken: null, user: null, isBootstrapped: true });
-    window.location.replace("/login");
+    set({
+      accessToken: null,
+      user: null,
+      isBootstrapped: true,
+    });
   },
 
-  bootstrap: (token) => {
+  bootstrap: () => {
+    const token = localStorage.getItem("token");
     set({
       accessToken: token,
       isBootstrapped: true,
