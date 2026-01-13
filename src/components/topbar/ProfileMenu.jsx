@@ -1,14 +1,17 @@
 import { useState } from "react";
 import { User, Settings, LogOut } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import { Link } from "react-router-dom";
+import { ROUTES } from "../../router/paths";
+import { useAuthStore } from "../../store/authStore";
 
 export default function ProfileMenu() {
   const [open, setOpen] = useState(false);
+  const clearAuth = useAuthStore((s) => s.clearAuth);
 
   const logout = () => {
-    localStorage.removeItem("token");
-    localStorage.removeItem("user");
-    window.location.href = "/login";
+    setOpen(false);
+    clearAuth(); // centralized logout
   };
 
   return (
@@ -16,7 +19,7 @@ export default function ProfileMenu() {
       {/* Profile Avatar */}
       <motion.button
         whileTap={{ scale: 0.9 }}
-        onClick={() => setOpen(!open)}
+        onClick={() => setOpen((o) => !o)}
         className="flex items-center"
       >
         <img
@@ -36,19 +39,29 @@ export default function ProfileMenu() {
             transition={{ duration: 0.18 }}
             className="absolute right-0 mt-2 w-48 bg-popover border rounded-md shadow z-50 text-sm"
           >
-            <button className="w-full px-4 py-2 hover:bg-muted flex items-center gap-2">
+            {/* My Profile */}
+            <Link
+              to={ROUTES.PROFILE}
+              onClick={() => setOpen(false)}
+              className="w-full px-4 py-2 hover:bg-muted flex items-center gap-2"
+            >
               <User size={16} />
-              Profile
-            </button>
+              My Profile
+            </Link>
 
-            <button className="w-full px-4 py-2 hover:bg-muted flex items-center gap-2">
+            {/* Settings (future) */}
+            <button
+              disabled
+              className="w-full px-4 py-2 opacity-50 cursor-not-allowed flex items-center gap-2"
+            >
               <Settings size={16} />
               Settings
             </button>
 
+            {/* Logout */}
             <button
-              className="w-full px-4 py-2 hover:bg-muted text-destructive flex items-center gap-2"
               onClick={logout}
+              className="w-full px-4 py-2 hover:bg-muted text-destructive flex items-center gap-2"
             >
               <LogOut size={16} />
               Logout

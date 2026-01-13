@@ -17,6 +17,9 @@ import ProjectDetails from "./pages/ProjectDetails";
 import TaskDetails from "./pages/TaskDetails";
 import ActivityPage from "./pages/ActivityPage";
 
+import Profile from "./pages/Profile";
+import UserProfile from "./pages/UserProfile";
+
 /* ---------------- PROTECTED LAYOUT ---------------- */
 
 function ProtectedLayout() {
@@ -45,6 +48,9 @@ export default function App() {
       {/* Protected */}
       <Route element={<ProtectedLayout />}>
         <Route index element={<Dashboard />} />
+
+        <Route path={ROUTES.PROFILE} element={<Profile />} />
+        <Route path="/users/:id" element={<UserProfile />} />
 
         <Route path={ROUTES.WORKSPACES} element={<WorkspacesIndex />} />
         <Route
