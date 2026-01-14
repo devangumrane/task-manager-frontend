@@ -114,9 +114,9 @@ export default function CreateTaskDialog({
                 >
                   Remove
                 </button>
-                console.log("ASSIGNED USER", assignedUser);
-                console.log("ASSIGNED TO PAYLOAD", assignedUser?.id, typeof
-                assignedUser?.id);
+                {/* console.log("ASSIGNED USER", assignedUser); */}
+                {/* console.log("ASSIGNED TO PAYLOAD", assignedUser?.id, typeof
+                assignedUser?.id); */}
               </div>
             ) : (
               <Input

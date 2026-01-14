@@ -69,7 +69,10 @@ export default function App() {
           element={<TaskDetails />}
         />
 
-        <Route path={ROUTES.ACTIVITY} element={<ActivityPage />} />
+        <Route
+          path="/workspaces/:workspaceId/activity"
+          element={<ActivityPage />}
+        />
       </Route>
 
       {/* Fallback */}

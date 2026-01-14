@@ -11,10 +11,8 @@ export const ROUTES = {
 
   TASK: (ws, p, t) => `/workspaces/${ws}/projects/${p}/tasks/${t}`,
 
-  ACTIVITY: "/activity",
+  ACTIVITY: (ws) => `/workspaces/${ws}/activity`,
 
-
-  // USER PROFILES
-  PROFILE: "/profile",          // current user
-  USER_PROFILE: (id) => `/users/${id}`, // public profile
+  PROFILE: "/profile",
+  USER_PROFILE: (id) => `/users/${id}`,
 };

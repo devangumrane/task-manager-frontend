@@ -1,16 +1,11 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { Menu, Home, Grid, Users, FileText } from "lucide-react";
 import { ROUTES } from "../../router/paths";
 
-const nav = [
-  { label: "Dashboard", to: ROUTES.DASHBOARD, icon: Home },
-  { label: "Workspaces", to: ROUTES.WORKSPACES, icon: Users },
-  { label: "Projects", to: ROUTES.PROJECTS, icon: Grid },
-  { label: "Activity", to: ROUTES.ACTIVITY, icon: FileText },
-];
-
 export default function Sidebar() {
+  const location = useLocation();
+
   const [collapsed, setCollapsed] = useState(() => {
     try {
       return JSON.parse(localStorage.getItem("sidebar-collapsed")) || false;
@@ -18,13 +13,55 @@ export default function Sidebar() {
       return false;
     }
   });
-  const location = useLocation();
 
   useEffect(() => {
     try {
-      localStorage.setItem("sidebar-collapsed", JSON.stringify(collapsed));
+      localStorage.setItem(
+        "sidebar-collapsed",
+        JSON.stringify(collapsed)
+      );
     } catch {}
   }, [collapsed]);
+
+  // -----------------------------------------
+  // Derive active workspaceId from URL
+  // /workspaces/:workspaceId/...
+  // -----------------------------------------
+  const activeWorkspaceId = useMemo(() => {
+    const match = location.pathname.match(
+      /^\/workspaces\/(\d+)/
+    );
+    return match ? match[1] : null;
+  }, [location.pathname]);
+
+  // -----------------------------------------
+  // Navigation (workspace-aware)
+  // -----------------------------------------
+  const nav = [
+    {
+      label: "Dashboard",
+      to: ROUTES.DASHBOARD,
+      icon: Home,
+    },
+    {
+      label: "Workspaces",
+      to: ROUTES.WORKSPACES,
+      icon: Users,
+    },
+    {
+      label: "Projects",
+      to: ROUTES.PROJECTS,
+      icon: Grid,
+    },
+    {
+      label: "Activity",
+      to: activeWorkspaceId
+        ? ROUTES.ACTIVITY(activeWorkspaceId)
+        : ROUTES.WORKSPACES,
+      icon: FileText,
+      disabled: !activeWorkspaceId,
+    },
+  ];
 
   return (
     <aside
@@ -33,22 +70,19 @@ export default function Sidebar() {
       aria-label="Sidebar"
     >
       <div className="h-full flex flex-col">
-        {/* Brand / Toggle */}
+        {/* -------------------------------- */}
+        {/* Header */}
+        {/* -------------------------------- */}
         <div className="flex items-center justify-between px-3 h-16 border-b">
           <div className="flex items-center gap-2">
-            <div
-              className={`flex items-center justify-center font-semibold text-lg ${
-                collapsed ? "w-8" : ""
-              }`}
-            >
-              {/* Mini logo */}
-              <div className="w-8 h-8 rounded bg-primary-foreground text-primary flex items-center justify-center">
-                {/* initial or icon */}
-                <span className="text-xs">TM</span>
-              </div>
+            <div className="w-8 h-8 rounded bg-primary-foreground text-primary flex items-center justify-center font-semibold">
+              TM
             </div>
-
-            {!collapsed && <span className="ml-2">Task Manager</span>}
+            {!collapsed && (
+              <span className="ml-2 font-medium">
+                Task Manager
+              </span>
+            )}
           </div>
 
           <button
@@ -60,23 +94,41 @@ export default function Sidebar() {
           </button>
         </div>
 
-        {/* Nav */}
+        {/* -------------------------------- */}
+        {/* Navigation */}
+        {/* -------------------------------- */}
         <nav className="flex-1 overflow-auto px-1 py-3">
           <ul className="space-y-1">
             {nav.map((item) => {
-              const active = location.pathname === item.to || location.pathname.startsWith(item.to + "/");
               const Icon = item.icon;
+              const isActive =
+                location.pathname === item.to ||
+                location.pathname.startsWith(item.to + "/");
+
               return (
-                <li key={item.to}>
+                <li key={item.label}>
                   <Link
                     to={item.to}
-                    className={`flex items-center gap-3 w-full rounded-md px-3 py-2 text-sm
-                      ${active ? "bg-primary/10 text-primary-foreground" : "text-muted-foreground hover:bg-muted/40"}
+                    aria-disabled={item.disabled}
+                    className={`flex items-center gap-3 w-full rounded-md px-3 py-2 text-sm transition
+                      ${
+                        isActive
+                          ? "bg-primary/10 text-primary"
+                          : "text-muted-foreground hover:bg-muted/40"
+                      }
+                      ${
+                        item.disabled
+                          ? "opacity-50 pointer-events-none"
+                          : ""
+                      }
                       ${collapsed ? "justify-center" : ""}`}
-                    aria-current={active ? "page" : undefined}
                   >
-                    <Icon size={18} className={`${active ? "text-primary" : ""}`} />
-                    {!collapsed && <span className="truncate">{item.label}</span>}
+                    <Icon size={18} />
+                    {!collapsed && (
+                      <span className="truncate">
+                        {item.label}
+                      </span>
+                    )}
                   </Link>
                 </li>
               );
@@ -84,11 +136,12 @@ export default function Sidebar() {
           </ul>
         </nav>
 
+        {/* -------------------------------- */}
         {/* Footer */}
+        {/* -------------------------------- */}
         <div className="px-3 py-4 border-t">
           <button
             onClick={() => {
-              // simple logout placeholder
               localStorage.removeItem("token");
               window.location.href = "/login";
             }}

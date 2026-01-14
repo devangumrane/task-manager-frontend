@@ -1,35 +1,50 @@
 import { Link } from "react-router-dom";
-import { ROUTES } from "../../router/paths";
 
 export default function TaskCard({ task, onStatusChange }) {
   return (
-    <div className="p-4 bg-white rounded-lg shadow space-y-2">
+    <div className="p-4 bg-white rounded-lg shadow space-y-3 border">
       {/* Title */}
-      <h3 className="font-medium">{task.title}</h3>
+      <h3 className="font-medium text-sm">{task.title}</h3>
 
-      {/* Assignee */}
-      <div className="text-xs">
-        {task.assigned ? (
+      {/* Creator */}
+      {task.creator && (
+        <div className="text-xs text-gray-600">
+          Created by{" "}
           <Link
-            to={ROUTES.USER_PROFILE(task.assigned.id)}
+            to={`/users/${task.creator.id}`}
             className="text-blue-600 hover:underline"
           >
-            Assigned to {task.assigned.name}
+            {task.creator.name || task.creator.email}
+          </Link>
+        </div>
+      )}
+
+      {/* Assignee */}
+      <div className="text-xs text-gray-600">
+        Assigned to{" "}
+        {task.assigned ? (
+          <Link
+            to={`/users/${task.assigned.id}`}
+            className="text-blue-600 hover:underline"
+          >
+            {task.assigned.name || task.assigned.email}
           </Link>
         ) : (
-          <span className="text-gray-400">Unassigned</span>
+          <span className="italic text-gray-400">Unassigned</span>
         )}
       </div>
 
       {/* Status */}
-      <p className="text-xs text-gray-500">Status: {task.status}</p>
+      <div className="text-xs text-gray-500">
+        Status: <span className="font-medium">{task.status}</span>
+      </div>
 
       {/* Status actions */}
-      <div className="flex gap-2 text-sm">
+      <div className="flex gap-2 text-xs pt-1">
         {task.status !== "todo" && (
           <button
             onClick={() => onStatusChange(task.id, "todo")}
-            className="hover:underline"
+            className="px-2 py-1 border rounded hover:bg-gray-50"
           >
             ← Todo
           </button>
@@ -38,7 +53,7 @@ export default function TaskCard({ task, onStatusChange }) {
         {task.status !== "in_progress" && (
           <button
             onClick={() => onStatusChange(task.id, "in_progress")}
-            className="hover:underline"
+            className="px-2 py-1 border rounded hover:bg-gray-50"
           >
             In Progress
           </button>
@@ -47,7 +62,7 @@ export default function TaskCard({ task, onStatusChange }) {
         {task.status !== "done" && (
           <button
             onClick={() => onStatusChange(task.id, "done")}
-            className="hover:underline"
+            className="px-2 py-1 border rounded hover:bg-gray-50"
           >
             Done →
           </button>
